@@ -324,7 +324,7 @@ def expand_instr(op, v):
     dword = lambda v: p32(v&0xFFFFFFFF).encode('hex')
 
     if op == 'e2':              		    # loop rel8
-        return '4974' + dword(v)		    # dec ecx ; jz label
+        return '4975' + dword(v)		    # dec ecx ; jnz label
     elif op == 'e3':                                # jecxz rel8
         return '85c974' + dword(v)		    # test ecx, ecx ; jz label
     elif op == 'eb':                                # jmp rel8
