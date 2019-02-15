@@ -1,0 +1,90 @@
+;
+; helper.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=helper.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+helper.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%helper.DeviceDesc%=helper_Device, Root\helper ; TODO: edit hw-id
+
+[helper_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+helper.sys
+
+;-------------- Service installation
+[helper_Device.NT.Services]
+AddService = helper,%SPSVCINST_ASSOCSERVICE%, helper_Service_Inst
+
+; -------------- helper driver install sections
+[helper_Service_Inst]
+DisplayName    = %helper.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\helper.sys
+
+;
+;--- helper_Device Coinstaller installation ------
+;
+
+[DestinationDirs]
+helper_Device_CoInstaller_CopyFiles = 11
+
+[helper_Device.NT.CoInstallers]
+AddReg=helper_Device_CoInstaller_AddReg
+CopyFiles=helper_Device_CoInstaller_CopyFiles
+
+[helper_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[helper_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[SourceDisksFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+[helper_Device.NT.Wdf]
+KmdfService =  helper, helper_wdfsect
+[helper_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "helper Installation Disk"
+helper.DeviceDesc = "helper Device"
+helper.SVCDESC = "helper Service"
