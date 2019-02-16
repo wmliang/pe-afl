@@ -4,5 +4,5 @@ workflow "on push" {
 }
 
 action "Python Syntax Checker" {
-  uses = "wmliang/pe-afl/.github/Python_Syntax_Checker@patch-1"
+  uses = "wmliang/pe-afl/.github/Python_Syntax_Checker@Github-Action"
 }
