@@ -103,4 +103,5 @@ File->Load File->Code coverage file->trace2.txt
 
 ## TODO
 
-support x64
+* [ ] support x64
+* [ ] support Python 3
