@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import collections
 import logging
@@ -193,10 +194,10 @@ def setup_argparse():
 
 
 def main(argc, argv):
-    print 'Corpus minimization tool for pe-afl'
-    print 'Based on corpus minimization tool for WinAFL by <0vercl0k@tuxfamily.org>'
-    print 'Based on WinAFL by <ifratric@google.com>'
-    print 'Based on AFL by <lcamtuf@google.com>'
+    print('Corpus minimization tool for pe-afl')
+    print('Based on corpus minimization tool for WinAFL by <0vercl0k@tuxfamily.org>')
+    print('Based on WinAFL by <ifratric@google.com>')
+    print('Based on AFL by <lcamtuf@google.com>')
 
     args = setup_argparse()
     logging.basicConfig(
@@ -335,7 +336,7 @@ def main(argc, argv):
         AFLShowMapWorker(args),
         inputs
     ):
-        print '\rProcessing file %d/%d...' % (i, inputs_len),
+        print('\rProcessing file %d/%d...' % (i, inputs_len), end=' ')
         i += 1
         # If the set of tuples is empty, something weird happened
         if len(result.tuples) == 0:
@@ -413,7 +414,7 @@ def main(argc, argv):
     effective_len = inputs_len - (
         len_crash_files + len_hang_files + len_empty_tuple_files
     )
-    print
+    print()
 
     len_uniq_tuples = len(uniq_tuples)
     logging.info(
@@ -479,16 +480,16 @@ def main(argc, argv):
         # We are now done with this tuple, we can get rid of it.
         del candidates[tuple_]
 
-        print '\rProcessing tuple %d/%d...' % (
+        print('\rProcessing tuple %d/%d...' % (
             len_uniq_tuples - len(remaining_tuples),
             len_uniq_tuples
-        ),
+        ), end=' ')
 
         # If we don't have any more tuples left, we are done.
         if len(remaining_tuples) == 0:
             break
 
-    print
+    print()
     logging.info('[+] Original set was composed of %d files', inputs_len)
     logging.info(
         '[+] Effective set was composed of %d files (total size %d MB).',

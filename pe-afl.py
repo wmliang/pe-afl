@@ -1,3 +1,4 @@
+from __future__ import print_function
 import instrument
 import argparse
 import os
@@ -9,7 +10,7 @@ if os.name == 'nt':
     def asm(code):
         kstool_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bin', 'kstool.exe')
         if not os.path.isfile(kstool_path):
-            print 'kstool.exe not found'
+            print('kstool.exe not found')
             quit()
         l = ';'.join([ l if '#' not in l else l.split('#')[0] for l in code.strip().split('\n')])
         output = subprocess.check_output(kstool_path+' x32 "'+l+'"', shell=True)

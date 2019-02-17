@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 
 H = lambda addr: hex(addr).strip('L')
@@ -61,18 +62,18 @@ def check_unicode(ea):
     if GetType(ea) in ['const WCHAR', 'WCHAR', 'wchar_t']:
         idaapi.make_ascii_string(ea, 0, ASCSTR_UNICODE); Wait();
         if GetStringType(ea) and GetStringType(ea)&0xFF != ASCSTR_UNICODE and Word(ea) != 0:
-            print '[WARN] Possible unicode @', H(ea)
+            print('[WARN] Possible unicode @', H(ea))
 
 def check_guid(ea):
     if GetType(ea) in ['CLSID', 'IID']:
-        print '[INFO] Fixed', GetType(ea), '@', H(ea)
+        print('[INFO] Fixed', GetType(ea), '@', H(ea))
         MakeUnknown(ea, 10, DOUNK_SIMPLE); Wait();
         SetType(ea, GetType(ea))
     t = idc.get_cmt(ea, 0).upper()[1:] if idc.get_cmt(ea, 0) else ''
     if t in ['CLSID', 'IID']:
         l = idc.GetOperandValue(ea, 0)
         if idaapi.getseg(l) and idaapi.getseg(l).perm and idaapi.SEGPERM_EXEC and (not GetType(l)):
-            print '[INFO] Fixed', t, '@', H(l)
+            print('[INFO] Fixed', t, '@', H(l))
             MakeUnknown(l, 10, DOUNK_SIMPLE); Wait();
             SetType(l, t)
 
@@ -122,9 +123,9 @@ def add_rip_relative_inst(head):
 
 def output_file():
     ida_dump = {'bb': bb, 'relative': relative, 'rip_inst': rip_inst, 'idata': idata, 'stk_frame': stk_frame, 'code_loc': code_loc}
-    print '[INFO]', str(len(bb)), 'blocks'
-    print '[INFO]', str(len(relative)), 'branches'
-    print '[INFO]', idc.GetInputFilePath()+'.dump.txt is created'
+    print('[INFO]', str(len(bb)), 'blocks')
+    print('[INFO]', str(len(relative)), 'branches')
+    print('[INFO]', idc.GetInputFilePath()+'.dump.txt is created')
     with open(idc.GetInputFilePath()+'.dump.txt', 'w+') as f:
         f.write(repr(ida_dump)+'\n')
 
@@ -193,12 +194,12 @@ set_color()
 
 # dump result
 if len(possible_code):
-    print '[WARN]',str(len(possible_code)),'possible code ?', str(possible_code)
+    print('[WARN]',str(len(possible_code)),'possible code ?', str(possible_code))
 if len(possible_data):
-    print '[WARN]',str(len(possible_data)),'possible data ?', str(possible_data)
+    print('[WARN]',str(len(possible_data)),'possible data ?', str(possible_data))
 if not idaapi.get_inf_structure().is_64bit() and len(rip_inst):
-    print '[WARN] rip-relative addressing mode on x86 ?'
-print '[INFO] re-run this script if you have fixed any [WARN] message manually in IDA'
-print '[INFO] partial instrumentation with partial_include() or partial_exclude() if necessary'
+    print('[WARN] rip-relative addressing mode on x86 ?')
+print('[INFO] re-run this script if you have fixed any [WARN] message manually in IDA')
+print('[INFO] partial instrumentation with partial_include() or partial_exclude() if necessary')
 output_file()
 
