@@ -399,6 +399,19 @@ def build_text_raw():
             name = s.Name.strip('\x00')
             LOG(name, '@', hex(start), '~', hex(end))
 
+def update_load_config_tbl(tbl, cnt, pe_size, append, align=4):
+    tbl2 = update_addr(tbl - pe.OPTIONAL_HEADER.ImageBase)
+    ofs,s = rva2ofs(tbl2), get_sec_by_rva(tbl2)
+    if hasattr(s, 'raw'): # original section
+        for n in range(cnt):
+            s.raw = strrep(s.raw, ofs+n*align, p32(update_addr(u32(s.raw[ofs+n*align:ofs+n*align+4]))))
+    else: # new section
+        append = '\x00'*pe_size + append
+        for n in range(cnt):
+            append = strrep(append, ofs+n*align, p32(update_addr(u32(append[ofs+n*align:ofs+n*align+4]))))
+        append = append[pe_size:]
+    return append
+
 def process_pe():
     # update section table
     # add new section entry, size of new section is affected by args.enlarge
@@ -560,22 +573,22 @@ def process_pe():
                 setattr(s, 'raw', p32(s.PointerToRawData) + '\x00'*(s.PointerToRawData-4) + s.get_data()) # padding
             s.raw = strrep(s.raw, e.address_offset, p32(update_addr(e.address)))
 
-    # update SEH handle table
+    # update SEHHandlerTable and GuardCFFunctionTable
     d = pe.get_directory_by_name('IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG')
     if d.VirtualAddress:
         s = get_sec_by_rva(d.VirtualAddress)
         if is_exe(s):
             d.VirtualAddress = update_addr(d.VirtualAddress)
-        tbl_addr = update_addr(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.SEHandlerTable - pe.OPTIONAL_HEADER.ImageBase)
-        tbl,s = rva2ofs(tbl_addr), get_sec_by_rva(tbl_addr)
-        if hasattr(s, 'raw'):
-            for n in range(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.SEHandlerCount):
-                s.raw = strrep(s.raw, tbl+n*4, p32(update_addr(u32(s.raw[tbl+n*4:tbl+n*4+4]))))
-        else:
-            append = '\x00'*pe_size + append
-            for n in range(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.SEHandlerCount):
-                append = strrep(append, tbl+n*4, p32(update_addr(u32(append[tbl+n*4:tbl+n*4+4]))))
-            append = append[pe_size:]
+        append = update_load_config_tbl(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.SEHandlerTable, pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.SEHandlerCount, pe_size, append)
+        if d.Size > 0x60:
+            extra = (pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.GuardFlags & 0xF0000000)>>28
+            append = update_load_config_tbl(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.GuardCFFunctionTable, pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.GuardCFFunctionCount, pe_size, append, align=extra+4)
+    # update TLS directory
+    d = pe.get_directory_by_name('IMAGE_DIRECTORY_ENTRY_TLS')
+    if d.VirtualAddress:
+        s = get_sec_by_rva(d.VirtualAddress)
+        if is_exe(s):
+            d.VirtualAddress = update_addr(d.VirtualAddress)
 
     # update PE header
     pe.OPTIONAL_HEADER.SizeOfImage = get_last_section('rva')
