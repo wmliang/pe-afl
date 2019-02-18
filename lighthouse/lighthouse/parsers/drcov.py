@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from __future__ import print_function
 import os
 import sys
 import mmap
@@ -52,7 +51,7 @@ class DrcovData(object):
         c = Counter(coverage_blocks)
         for k in c:
             addr = k[0]+self.base
-            print(hex(addr).strip('L'), c[k])
+            print hex(addr).strip('L'), c[k]
 
         return coverage_blocks
 
@@ -67,6 +66,6 @@ if __name__ == "__main__":
 
     # attempt file parse
     x = DrcovData(trace_file)
-    print(x.get_blocks_by_module(''))
+    print x.get_blocks_by_module('')
 
 

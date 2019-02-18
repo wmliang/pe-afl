@@ -58,7 +58,7 @@ def chunks(l, n):
 
     From http://stackoverflow.com/a/312464
     """
-    for i in range(0, len(l), n):
+    for i in xrange(0, len(l), n):
         yield l[i:i + n]
 
 def hex_list(items):

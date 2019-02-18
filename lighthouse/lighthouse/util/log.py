@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os
 import sys
 import logging
@@ -19,7 +18,7 @@ def lmsg(message):
 
     # only print to disassembler if its output window is alive
     if disassembler.is_msg_inited():
-        print(prefix_message)
+        print prefix_message
     else:
         logger.info(message)
 
