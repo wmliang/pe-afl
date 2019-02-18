@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pefile
 import struct
 import sys
@@ -18,6 +19,6 @@ def go(fname):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print 'Usage:', sys.argv[0], '<PE>'
+        print('Usage:', sys.argv[0], '<PE>')
         quit()
     go(sys.argv[1])

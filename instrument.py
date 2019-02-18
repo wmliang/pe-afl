@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import bisect
 import pefile
@@ -64,17 +65,17 @@ class ADDR:
 
 def LOG(*args_):
     if args.verbose:
-        print ' '.join(list(args_))
+        print(' '.join(list(args_)))
 
 def INFO(s):
-    print '[*] ' + s
+    print('[*] ' + s)
 
 def clear_stub():
     if '.no_stub' not in pe.path:
         # leave space for section table
         import clear_stub
         name = clear_stub.go(pe.path)
-        print 'cleared DOS stub'
+        print('cleared DOS stub')
         load_pe(name)
 
 def check_certificate():
@@ -82,7 +83,7 @@ def check_certificate():
     if d.VirtualAddress:
         import remove_certificate
         name = remove_certificate.go(pe.path)
-        print 'removed certificate'
+        print('removed certificate')
         load_pe(name)
 
 def in_range(val, pair):
@@ -356,7 +357,7 @@ def seh_padding():
         addr = ofs2va(get_last(s.addr_set, ofs))
         inject_code(addr, '\x90'*(4-delta))
         build_map(s)
-        print 'SEHandlerTable is padded'
+        print('SEHandlerTable is padded')
     return is_padded
 
 def update_addr(addr):
@@ -386,7 +387,7 @@ def dup_sec(sec, name=None, size=0):
     assert s.get_file_offset() + 40 <= pe.OPTIONAL_HEADER.SizeOfHeaders, 'TODO'
     pe.__structures__.append(s)
     pe.sections.append(s)
-    print 'added section', s.Name.strip('\x00')
+    print('added section', s.Name.strip('\x00'))
     LOG(str(s))
     return s
 
@@ -432,7 +433,7 @@ def process_pe():
     cut_reloc_size = update_and_verify_section_table()
 
     # update relative address
-    print 'expanding relative ...'
+    print('expanding relative ...')
     jmp_map = {}
     relative = {}
     for k in sorted(ida['relative']):
@@ -463,11 +464,11 @@ def process_pe():
         e = len(expand_instr(relative[k].op, 0))/2-cmd_len
         # the expanded byte is stored in the next instruction
         inject_code(k+cmd_len, expand='\x00'*e)
-    print 'expanded %d of %d branches ' % (len(expand_list), len(relative))
+    print('expanded %d of %d branches ' % (len(expand_list), len(relative)))
 
     build_map()
     seh_padding()
-    print 'updating relative ...'
+    print('updating relative ...')
 
     for k in sorted(relative):
         from_ofs = va2ofs(k)
@@ -487,7 +488,7 @@ def process_pe():
         s.raw = strrep(s.raw, from_ofs, instr[:cmd_len])
 
     # update .reloc entry
-    print 'updating relocation ...'
+    print('updating relocation ...')
     for base_reloc in pe.DIRECTORY_ENTRY_BASERELOC:
         for reloc in base_reloc.entries:
             if reloc.type == pefile.RELOCATION_TYPE['IMAGE_REL_BASED_ABSOLUTE']:
@@ -509,7 +510,7 @@ def process_pe():
 
     # add and update reloc from injected
     if hasattr(args, 'pe_afl') and not args.nop:
-        print 'updating relocation in instrumented code ...'
+        print('updating relocation in instrumented code ...')
         t = pefile.RELOCATION_TYPE['IMAGE_REL_BASED_HIGHLOW'] if is_32() else pefile.RELOCATION_TYPE['IMAGE_REL_BASED_DIR64']
         afl_area_ptr = get_sec_by_name('.cov').VirtualAddress + pe.OPTIONAL_HEADER.ImageBase
         afl_prev_loc = afl_area_ptr + 0x10000
@@ -531,7 +532,7 @@ def process_pe():
                 add_to_reloc(addr + m[i], t)
     append_reloc = write_reloc()
 
-    print 'finalizing ...'
+    print('finalizing ...')
     append = ''
     mapping_txt = ''
     pe_size = pe.get_length() - cut_reloc_size
@@ -613,7 +614,7 @@ def process_pe():
             s.raw = s.raw[u32(s.raw[:4]):]
             if not is_exe(s):
                 assert len(s.raw) == s.SizeOfRawData, 'Section size has changed'
-            print 'updated', s.Name.strip('\x00')
+            print('updated', s.Name.strip('\x00'))
 
     return cut_reloc_size, append + append_reloc 
 
@@ -635,7 +636,7 @@ def load_pe(fname):
         pe = pefile.PE(fname)
         pe.path = fname
     except:
-        print 'Invalid PE file @', fname
+        print('Invalid PE file @', fname)
         quit()
 
 def start(a):
@@ -650,7 +651,7 @@ def start(a):
     build_text_raw()
 
     # import dump.txt from IDA
-    ida = eval(file(args.IDA_DUMP).read().strip())
+    ida = eval(open(args.IDA_DUMP).read().strip())
     code_loc = sorted(ida['code_loc'].keys())
     return pe,ida
 
@@ -664,7 +665,7 @@ def end():
     fname = fname[0]+'.instrumented.'+fname[-1]
     pe.write(filename=fname, append=append, cut=cut_size)
 
-    print 'fixing PE checksum ...'
+    print('fixing PE checksum ...')
     load_pe(fname)
     pe.OPTIONAL_HEADER.CheckSum = pe.generate_checksum()
     pe.write(filename=fname)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import bisect
 import pefile
@@ -10,7 +11,7 @@ def readfile(p):
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
-        print 'Usage: {} [XXX.sys] [XXX.sys.mapping.txt] [trace.txt]'.format(sys.argv[0])
+        print('Usage: {} [XXX.sys] [XXX.sys.mapping.txt] [trace.txt]'.format(sys.argv[0]))
         quit()
 
 trace = readfile(sys.argv[3])
@@ -26,4 +27,4 @@ for m in mapping:
     mm[int(y,16)] = int(x,16)
 kk = sorted(mm.keys())
 for c in trace:
-    print hex(mm[get_last(kk, c)])
+    print(hex(mm[get_last(kk, c)]))
