@@ -69,10 +69,10 @@ mov ebx, dword ptr [ebx+0x37c]
 mov ebx, fs:0x124
 mov ebx, dword ptr [ebx+0x22c]
 '''
-    if args.os == 'win7':
-        PsGetCurrentProcessId = PsGetCurrentProcessId_win7
-    else:
+    if pe.OPTIONAL_HEADER.MajorOperatingSystemVersion == 10:
         PsGetCurrentProcessId = PsGetCurrentProcessId_win10
+    else:
+        PsGetCurrentProcessId = PsGetCurrentProcessId_win7
     snip['filter'] = asm('''
 push ebx
 push eax
@@ -158,7 +158,6 @@ def parse_arg():
     parser.add_argument('-s', '--stack', help='Enable stack frame poisoning', action='store_true')
     parser.add_argument('-e', '--entry', help='Inject code on entry point, ie. -e9090')
     parser.add_argument('-l', '--enlarge', help='Enlarge section size, default=4')
-    parser.add_argument('-o', '--os', help='Use PsGetCurrentProcessId depends on OS version, default is win10, ie. -owin7')
     parser.add_argument('PE', help='Target PE for instrument')
     parser.add_argument('IDA_DUMP', help='dump.txt from IDA')
     return parser.parse_args()
@@ -178,7 +177,6 @@ if __name__ == '__main__':
         instrument.INFO('kernel-mode driver is instrumenting')
         if args.callback:
             instrument.INFO('callback instrument is on')
-        instrument.INFO('OS version is assumed as ' + ('win10' if not args.os else 'win7'))
     else:
         instrument.INFO('user-mode binary is instrumenting')
         if args.multi:
@@ -188,8 +186,8 @@ if __name__ == '__main__':
     if args.stack:
         instrument.INFO('stack frame poisoning is on')
 
-    init_snip()
     pe,ida=instrument.start(args)
+    init_snip()
 
     # stack frame poison instrument
     if args.stack:
