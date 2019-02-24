@@ -323,21 +323,27 @@ def update_instr(op, operand_len, v):
 def expand_instr(op, v):
     assert check32(v), 'v is out of range'
     dword = lambda v: p32(v&0xFFFFFFFF).encode('hex')
+    mpx = ''
+    if op.startswith('f2'):
+        mpx = 'f2'
+        op = op[2:]
 
     if op == 'e2':              		    # loop rel8
+        assert mpx == '', 'unsupport op ' + op
         return '4975' + dword(v)		    # dec ecx ; jnz label
     elif op == 'e3':                                # jecxz rel8
+        assert mpx == '', 'unsupport op ' + op
         return '85c974' + dword(v)		    # test ecx, ecx ; jz label
     elif op == 'eb':                                # jmp rel8
-        return 'e9' + dword(v)
+        return mpx + 'e9' + dword(v)
     elif op == 'e9':                                # jmp rel32
-        return 'e9' + dword(v)
+        return mpx + 'e9' + dword(v)
     elif op == 'e8':                                # call
-        return 'e8' + dword(v)
+        return mpx + 'e8' + dword(v)
     elif op[0] == '7':                              # jxx rel8
-        return '0f8' + op[-1] + dword(v)
+        return mpx + '0f8' + op[-1] + dword(v)
     elif op[:3] == '0f8':                           # jxx rel32
-        return op + dword(v)
+        return mpx + op + dword(v)
     else:
         assert False, 'unsupport op ' + op 
 

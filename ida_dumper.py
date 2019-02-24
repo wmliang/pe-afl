@@ -5,12 +5,17 @@ H = lambda addr: hex(addr).strip('L')
 def parse_relative(ea):
     buf = idc.GetManyBytes(ea, ItemSize(ea))
     idx = 0
+    mpx_candidate = False
 
     # call (e8), http://x86.renejeschke.de/html/file_module_x86_id_26.html
     # jmp (eb/e9), http://x86.renejeschke.de/html/file_module_x86_id_147.html
     # jxx (0F 80/0F 81/0F 82/0F 83/0F 84/0F 85/0F 86/0F 87/0F 88/0F 89/0F 8A/0F 8B/0F 8C/0F 8D/0F 8E/0F 8F/70/71/72/73/74/75/76/77/78/79/7A/7B/7C/7D/7E/7F), http://x86.renejeschke.de/html/file_module_x86_id_146.html
     # jcxz/jecxz (67 e3/e3)
     # loop/loope/loopz/loopne/loopnz (e0/e1/e2), http://x86.renejeschke.de/html/file_module_x86_id_161.html
+    if ord(buf[idx]) == 0xf2:
+        idx += 1
+        mpx_candidate = True
+
     if ord(buf[idx]) in [0xe0, 0xe1, 0xe2, 0xe3, 0xe8, 0xe9, 0xeb]:
         idx += 1
     elif ord(buf[idx]) == 0x0f and (ord(buf[idx+1]) >= 0x80 and ord(buf[idx+1]) <= 0x8f):
@@ -20,6 +25,9 @@ def parse_relative(ea):
     elif ord(buf[idx]) == 0x67 and ord(buf[idx+1]) == 0xe3:
         idx += 2
 
+    if mpx_candidate and idx == 1:
+        idx = 0
+  
     if idx:
         return buf[0:idx], buf[idx:]
     else:
@@ -172,8 +180,8 @@ def process(text):
 # partial_include() and partial_exclude() provides manual partial instrumentation
 # 
 # partial_include('(_?Cm|_Hv[^il])')
-# partial_exclude(function_address)
-# partial_exclude(start_address, end_address)
+# partial_exclude(ScreenEA())
+# partial_exclude(0x401020, 0x401040)
 #
 
 Wait()
