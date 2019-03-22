@@ -10,7 +10,9 @@ i reported bugs on office,gdiplus,jet,lnk,clfs,cng,hid by using this tool
 
 the instrumentation part on PE can be reused on many purpose
 
-ps. scripts run faster on non-windows
+ps1. if you feel slow on instrumenting, you can run the script on ubuntu
+
+ps2. the instrument is based on microsoft binary and the binary compiled by visual studio, so it may fail on non-microsoft compiler
 
 ## How-to instrument
 
