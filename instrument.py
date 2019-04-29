@@ -551,7 +551,8 @@ def process_pe():
            tt = pe_size+len(append)-injected[idx].tlen+len(injected[idx].exp)
            tts = get_sec_by_ofs(tt)
            LOG('[merge] idx =', hex(idx), hex(tt))
-           mapping_txt += hex(idx-s.PointerToRawData+s.VirtualAddress+pe.OPTIONAL_HEADER.ImageBase) + '\t' + hex(tt-tts.PointerToRawData+tts.VirtualAddress+pe.OPTIONAL_HEADER.ImageBase) + '\n'
+           mapping_txt += hex(idx-s.PointerToRawData+s.VirtualAddress+pe.OPTIONAL_HEADER.ImageBase).strip('L') + '\t'
+           mapping_txt += hex(tt-tts.PointerToRawData+tts.VirtualAddress+pe.OPTIONAL_HEADER.ImageBase).strip('L') + '\n'
            old_idx = idx
        append += s.raw[idx:]
        end = new_s.PointerToRawData + new_s.SizeOfRawData
