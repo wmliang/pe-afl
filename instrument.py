@@ -588,7 +588,7 @@ def process_pe():
         if is_exe(s):
             d.VirtualAddress = update_addr(d.VirtualAddress)
         append = update_load_config_tbl(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.SEHandlerTable, pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.SEHandlerCount, pe_size, append)
-        if d.Size > 0x60:
+        if pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.Size > 0x60:
             extra = (pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.GuardFlags & 0xF0000000)>>28
             append = update_load_config_tbl(pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.GuardCFFunctionTable, pe.DIRECTORY_ENTRY_LOAD_CONFIG.struct.GuardCFFunctionCount, pe_size, append, align=extra+4)
     # update TLS directory
